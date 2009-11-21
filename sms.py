@@ -12,10 +12,20 @@ verbose = True
 
 # Set up some example lists
 #all = ['', '', '','']
-catalog=open('./numbers.txt','r')
-all=catalog.read().split()
-catalog.close()
-
+admins_file='./admins.txt'
+catalog_file='./numbers.txt'
+try:
+   catalog=open(catalog_file,'r')
+   all=catalog.read().split()
+   catalog.close()
+except IOError:
+   try:
+      print 'Created empty catalog since none existed at ' , catalog_file
+      open(catalog_file, 'w').close()
+   except IOError as (errno, strerror):
+      print  'Could not create catalog at %s , %s' % (catalog_file, strerror)
+   print 'Running with testnumbers just to get started!'
+   all='+467000000002','+467000000001'
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
 for num in all:
@@ -27,7 +37,7 @@ ll2.timestamp = True
 
 lists = [ll1,ll2]
 
-admins = ['+46700000000']
+admins = ['+4670000000']
 def isAdmin(num):
     for n in admins:
         if n == num:
