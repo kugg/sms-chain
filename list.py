@@ -10,7 +10,7 @@ def normalizeNumber(num):
     #if num[:2] == '07':
     #    num = '+46' + num[1:]
     countrycodes={'Sweden':'+46','Denmark':'+45'}
-    operatorprefix={'Tele2':'073','Telia':'070','TDC':'54'}
+    operatorprefix={'tdc':'','sonofon':'','orange':'','telia':'','tre':''}
     #TODO add countrycodes and operator codes!
     for country, code in countrycodes.items():
         #print num, country
