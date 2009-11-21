@@ -1,21 +1,34 @@
 
 def normalizeNumber(num):
     # basic error checking
-    # convert numbers to normal form (+467...)
-    if num[:2] == '07':
-        num = '+46' + num[1:]
-    elif num[:3] != '+46':
-        print "Error wrong format on number:", num
-        return None
 
     # remove odd characters
     num = num.replace('-','')
     num = num.replace(' ','')
 
-    if len(num) != 12:
-        print "Error wrong number of digits:", num
-        return None
+    # convert numbers to normal form (+467...)
+    #if num[:2] == '07':
+    #    num = '+46' + num[1:]
+    countrycodes={'Sweden':'+46','Denmark':'+45'}
+    operatorprefix={'Tele2':'073','Telia':'070','TDC':'54'}
+    #TODO add countrycodes and operator codes!
+    for country, code in countrycodes.items():
+        #print num, country
+	if num[:3]==code:
+             return num
+             #print num , country
+	#else:
+	#    print num, 'Unknown countrycode'
 
+    #if num[:3] == '+46':
+    #     print "Not swedish format on number:", num
+    #	return None
+    #elif num[:3] == '+45':
+    #	print ""
+    #if len(num) != 12:
+    #    print "Error wrong number of digits:", num
+    #    return None
+ 
     return num
 
 class List:

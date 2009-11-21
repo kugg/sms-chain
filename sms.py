@@ -11,7 +11,6 @@ TESTING = True
 verbose = True
 
 # Set up some example lists
-#all = ['', '', '','']
 admins_file='./admins.txt'
 catalog_file='./numbers.txt'
 try:
@@ -25,19 +24,20 @@ except IOError:
    except IOError as (errno, strerror):
       print  'Could not create catalog at %s , %s' % (catalog_file, strerror)
    print 'Running with testnumbers just to get started!'
-   all='+467000000002','+467000000001'
+   all=['070-0000002','070-0000001']
+
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
 for num in all:
     ll1.addNumber(num)
     ll2.addNumber(num)
 
-ll2.addAdmin('')
+ll2.addAdmin('070-000 000 2')
 ll2.timestamp = True
 
 lists = [ll1,ll2]
 
-admins = ['+4670000000']
+admins = ['+46700000000']
 def isAdmin(num):
     for n in admins:
         if n == num:

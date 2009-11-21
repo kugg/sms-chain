@@ -15,5 +15,5 @@ class StateMachine:
         return 100
 
     def gotsms(self, msg):
-        data = {'Number': '+470000000', 'Text': msg }
+        data = {'Number': '+467000000', 'Text': msg }
         self.callback(self, 'SMS', data)
