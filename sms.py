@@ -11,7 +11,7 @@ TESTING = True
 verbose = True
 
 # Set up some example lists
-all = ['0735531303', '+46702317172', '0737427772','+46700000000']
+all = ['', '', '','']
 
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
@@ -19,7 +19,7 @@ for num in all:
     ll1.addNumber(num)
     ll2.addNumber(num)
 
-ll2.addAdmin('0735531303')
+ll2.addAdmin('')
 ll2.timestamp = True
 
 lists = [ll1,ll2]
