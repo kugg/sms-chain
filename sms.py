@@ -11,7 +11,10 @@ TESTING = True
 verbose = True
 
 # Set up some example lists
-all = ['', '', '','']
+#all = ['', '', '','']
+catalog=open('./numbers.txt','r')
+all=catalog.read().split()
+catalog.close()
 
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
