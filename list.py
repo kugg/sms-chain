@@ -9,25 +9,14 @@ def normalizeNumber(num):
     # convert numbers to normal form (+467...)
     #if num[:2] == '07':
     #    num = '+46' + num[1:]
-    countrycodes={'Sweden':'+46','Denmark':'+45'}
+    countrycodes={'Sweden':'+46','Denmark':'+45','Uk':'+44'}
     operatorprefix={'tdc':'','sonofon':'','orange':'','telia':'','tre':''}
     #TODO add countrycodes and operator codes!
     for country, code in countrycodes.items():
-        #print num, country
 	if num[:3]==code:
+             #TODO Add country based separation here!
              return num
-             #print num , country
-	#else:
-	#    print num, 'Unknown countrycode'
-
-    #if num[:3] == '+46':
-    #     print "Not swedish format on number:", num
-    #	return None
-    #elif num[:3] == '+45':
-    #	print ""
-    #if len(num) != 12:
-    #    print "Error wrong number of digits:", num
-    #    return None
+	     #TODO Add operator based separation here!
  
     return num
 

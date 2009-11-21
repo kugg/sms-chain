@@ -25,7 +25,7 @@ except IOError:
    except IOError, (errno, strerror):
       print  'Could not create catalog at %s , %s' % (catalog_file, strerror)
    print 'Running with testnumbers just to get started!'
-   all=['070-0000002','070-0000001']
+   all=['+4670-0000002','+4670-0000001']
 
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
@@ -33,12 +33,12 @@ for num in all:
     ll1.addNumber(num)
     ll2.addNumber(num)
 
-ll2.addAdmin('070-000 000 2')
+ll2.addAdmin('+447785016005')
 ll2.timestamp = True
 
 lists = [ll1,ll2]
 
-admins = ['+46700000000']
+admins = ['+447785016005']
 def isAdmin(num):
     for n in admins:
         if n == num:

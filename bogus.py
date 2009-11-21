@@ -1,6 +1,7 @@
 class StateMachine:
     def __init__(self):
         self.callback = None
+	
     def SendSMS(self, message):
         print "Bogus sending sms: ", message
     def ReadConfig(self):
@@ -15,5 +16,5 @@ class StateMachine:
         return 100
 
     def gotsms(self, msg):
-        data = {'Number': '+467000000', 'Text': msg }
+        data = {'Number': '+447785016005', 'Text': msg }
         self.callback(self, 'SMS', data)
