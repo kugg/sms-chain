@@ -13,6 +13,7 @@ verbose = True
 # Set up some example lists
 admins_file='./admins.txt'
 catalog_file='./numbers.txt'
+
 try:
    catalog=open(catalog_file,'r')
    all=catalog.read().split()
@@ -21,7 +22,7 @@ except IOError:
    try:
       print 'Created empty catalog since none existed at ' , catalog_file
       open(catalog_file, 'w').close()
-   except IOError as (errno, strerror):
+   except IOError, (errno, strerror):
       print  'Could not create catalog at %s , %s' % (catalog_file, strerror)
    print 'Running with testnumbers just to get started!'
    all=['070-0000002','070-0000001']
