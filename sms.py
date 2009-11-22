@@ -27,7 +27,10 @@ def unhandled_exception_hook(type, value, tb):
    elif type==SystemExit:
       pass
       #Take away potential pidfile if we are daemon.
-   print 'Unhandled error:', type, value , traceback.print_last()
+   elif type==gammu.ERR_TIMEOUT:
+      traceback.print_exception(tb)
+      print traceback.tb_lineno(tb)
+   print 'Unhandled error:', type, value , traceback.tb_lineno(tb)
    #sys.exit(1)
 
 sys.excepthook = unhandled_exception_hook
