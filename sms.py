@@ -38,14 +38,14 @@ try:
    admins=admincatalog.read().split()
    
    if len(admins)<1:
-      raise KeyError (1, 'Nothing in there!')
+      raise UserWarning (1, 'Nothing in there!')
 
 except IOError, (errno, strerror):
    print 'Warning: Could not find configuraiton file for admins in %s , %s' % (admin_file, strerror)
    print 'Warning: Not using any admins!'
    admins=[]
 
-except KeyError, (errno, strerror):
+except UserWarning, (errno, strerror):
    print 'Warning: Problem with admin configuration! in %s , %s' % (admin_file, strerror)
    print 'Warning: Not using any admins!'
    admins=[]
@@ -56,14 +56,14 @@ try:
    usercatalog.close()
 
    if len(users)<1:
-      raise KeyError (1, 'Nothing in there!')
+      raise UserWarning (1, 'Nothing in there!')
 	 
 except IOError, (errno, strerror):
    print 'Warning: Could not read recipients catalog file %s, %s' % (catalog_file, strerrror )
    print 'Warning: Not using any recipients!'
    users=[]
 
-except KeyError, (errno, strerror):
+except UserWarning, (errno, strerror):
    print 'Warning: Problem with recipients catalog in %s , %s' % (catalog_file, strerror)
    print 'Warning: Not using any recipients!'
    users=[]
