@@ -5,7 +5,7 @@ import time
 from list import *
 import bogus
 import sys
-
+import traceback
 TESTING = True
 
 # Whether be a bit more verbose
@@ -16,19 +16,19 @@ admin_file='./admins.txt'
 catalog_file='./numbers.txt'
 
 
-def unhandled_exception_hook(type, value, traceback):
+def unhandled_exception_hook(type, value, tb):
    if type==KeyboardInterrupt:
       print 'Goodbye!'
       sys.exit(0)
    elif type==MemoryError:
       print 'Running our of memory!'
       print value
-      print traceback
+      print tb
    elif type==SystemExit:
       pass
       #Take away potential pidfile if we are daemon.
-   print 'Unhandled error:', type, value
-   sys.exit(1)
+   print 'Unhandled error:', type, value , traceback.print_last()
+   #sys.exit(1)
 
 sys.excepthook = unhandled_exception_hook
 
@@ -59,7 +59,7 @@ try:
       raise UserWarning (1, 'Nothing in there!')
 	 
 except IOError, (errno, strerror):
-   print 'Warning: Could not read recipients catalog file %s, %s' % (catalog_file, strerrror )
+   print 'Warning: Could not read recipients catalog file %s, %s' % (catalog_file, strerror)
    print 'Warning: Not using any recipients!'
    users=[]
 
