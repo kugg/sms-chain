@@ -1,0 +1,13 @@
+The SMS backend was based on gammu, downloaded from http://cihar.com/gammu/
+
+Most of source is covered by GNU GPL license. Following copyright notices
+apply to GNU GPL licensed parts:
+
+SMS daemon code:
+
+Copyright (C) 2002-2004 by Marcin Wiacek and Joergen Thomsen
+Copyright (C) 2009 by Michal Čihař
+
+
+
+
