@@ -15,6 +15,24 @@ verbose = True
 admin_file='./admins.txt'
 catalog_file='./numbers.txt'
 
+
+def unhandled_exception_hook(type, value, traceback):
+   if type==KeyboardInterrupt:
+      print 'Goodbye!'
+      sys.exit(0)
+   elif type==MemoryError:
+      print 'Running our of memory!'
+      print value
+      print traceback
+   elif type==SystemExit:
+      pass
+      #Take away potential pidfile if we are daemon.
+   print 'Unhandled error:', type, value
+   sys.exit(1)
+
+sys.excepthook = unhandled_exception_hook
+
+
 try:
    admincatalog=open(admin_file,'r')
    admins=admincatalog.read().split()
@@ -54,7 +72,7 @@ if users==[] and admins==[]:
    print 'Error: You dont have neither Admins nor Users so this setup is useless! Create at least one admin account.'
    sys.exit(1)
 
-#This stuff is not obvious it needs to be more clear!
+#This stuff is an example and not proper service operation code. TODO handle lists so that they can be rw'es from more then one sources...
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
 for num in users:
