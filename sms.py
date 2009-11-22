@@ -6,7 +6,7 @@ from list import *
 import bogus
 import sys
 import traceback
-TESTING = True
+TESTING = False
 
 # Whether be a bit more verbose
 verbose = True
@@ -16,22 +16,29 @@ admin_file='./admins.txt'
 catalog_file='./numbers.txt'
 
 
-def unhandled_exception_hook(type, value, tb):
-   if type==KeyboardInterrupt:
+def unhandled_exception_hook(errtype, value, tb):
+   #handle gammu errors separately
+   gammu_names=dir(gammu)
+   for gammu_name in gammu_names:
+      if 'ERR'==gammu_name[:3]:
+         #print errtype.__name__, gammu_name
+         if gammu_name==errtype.__name__:
+             print value
+	     sys.exit(1)
+   
+   if errtype==KeyboardInterrupt:
       print 'Goodbye!'
       sys.exit(0)
-   elif type==MemoryError:
+   elif errtype==MemoryError:
       print 'Running our of memory!'
       print value
       print tb
-   elif type==SystemExit:
+   elif errtype==SystemExit:
       pass
       #Take away potential pidfile if we are daemon.
-   elif type==gammu.ERR_TIMEOUT:
-      traceback.print_exception(tb)
-      print traceback.tb_lineno(tb)
-   print 'Unhandled error:', type, value , traceback.tb_lineno(tb)
-   #sys.exit(1)
+   else:
+      print 'Unhandled error:', errtype, value , traceback.tb_lineno(tb)
+      sys.exit(1)
 
 sys.excepthook = unhandled_exception_hook
 
