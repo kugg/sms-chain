@@ -24,8 +24,8 @@ def unhandled_exception_hook(errtype, value, tb):
          #print errtype.__name__, gammu_name
          if gammu_name==errtype.__name__:
              print value
-	     sys.exit(1)
-   
+  	     return 0
+ 
    if errtype==KeyboardInterrupt:
       print 'Goodbye!'
       sys.exit(0)
