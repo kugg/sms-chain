@@ -4,6 +4,7 @@ import gammu
 import time
 from list import *
 import bogus
+import sys
 
 TESTING = True
 
@@ -11,25 +12,52 @@ TESTING = True
 verbose = True
 
 # Set up some example lists
-admins_file='./admins.txt'
+admin_file='./admins.txt'
 catalog_file='./numbers.txt'
 
 try:
-   catalog=open(catalog_file,'r')
-   all=catalog.read().split()
-   catalog.close()
-except IOError:
-   try:
-      print 'Created empty catalog since none existed at ' , catalog_file
-      open(catalog_file, 'w').close()
-   except IOError, (errno, strerror):
-      print  'Could not create catalog at %s , %s' % (catalog_file, strerror)
-   print 'Running with testnumbers just to get started!'
-   all=['+4670-0000002','+4670-0000001']
+   admincatalog=open(admin_file,'r')
+   admins=admincatalog.read().split()
+   
+   if len(admins)<1:
+      raise KeyError (1, 'Nothing in there!')
 
+except IOError, (errno, strerror):
+   print 'Warning: Could not find configuraiton file for admins in %s , %s' % (admin_file, strerror)
+   print 'Warning: Not using any admins!'
+   admins=[]
+
+except KeyError, (errno, strerror):
+   print 'Warning: Problem with admin configuration! in %s , %s' % (admin_file, strerror)
+   print 'Warning: Not using any admins!'
+   admins=[]
+
+try:
+   usercatalog=open(catalog_file,'r')
+   users=usercatalog.read().split()
+   usercatalog.close()
+
+   if len(users)<1:
+      raise KeyError (1, 'Nothing in there!')
+	 
+except IOError, (errno, strerror):
+   print 'Warning: Could not read recipients catalog file %s, %s' % (catalog_file, strerrror )
+   print 'Warning: Not using any recipients!'
+   users=[]
+
+except KeyError, (errno, strerror):
+   print 'Warning: Problem with recipients catalog in %s , %s' % (catalog_file, strerror)
+   print 'Warning: Not using any recipients!'
+   users=[]
+
+if users==[] and admins==[]:
+   print 'Error: You dont have neither Admins nor Users so this setup is useless! Create at least one admin account.'
+   sys.exit(1)
+
+#This stuff is not obvious it needs to be more clear!
 ll1 = List('A. ')
 ll2 = List('B. ', List.TYPE_CLOSED)
-for num in all:
+for num in users:
     ll1.addNumber(num)
     ll2.addNumber(num)
 
@@ -38,7 +66,7 @@ ll2.timestamp = True
 
 lists = [ll1,ll2]
 
-admins = ['+447785016005']
+#admins = ['+447785016005']
 def isAdmin(num):
     for n in admins:
         if n == num:
