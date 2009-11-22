@@ -115,21 +115,21 @@ def Callback(sm, type, data):
 
     tstamp = time.strftime("%H:%M", time.localtime())
 
-    for list in lists:
-        if list.prefix == data['Text'][:len(list.prefix)]:
+    for currentlist in lists:
+        if currentlist.prefix == data['Text'][:len(currentlist.prefix)]:
             fromNum = data['Number']
 
             # Check authorization
-            if isAdmin(fromNum) or list.authorizedToSend(fromNum):
+            if isAdmin(fromNum) or currentlist.authorizedToSend(fromNum):
                 # Everything is in order, start sending smses
 
                 # Remove prefix and add optional timestamp
-                response = data['Text'][len(list.prefix):]
-                if list.timestamp:
+                response = data['Text'][len(currentlist.prefix):]
+                if currentlist.timestamp:
                     response = tstamp + ' ' + response
 
                 # send away!
-                for num in list.list:
+                for num in currentlist.list:
                     message = {'Text': response, 'SMSC': {'Location': 1}, 'Number': num}
                     if verbose:
                         print "sending", message
