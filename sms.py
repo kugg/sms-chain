@@ -6,7 +6,9 @@ from list import *
 import bogus
 import sys
 import traceback
-TESTING = False
+import os
+import glob
+TESTING = True
 
 # Whether be a bit more verbose
 verbose = True
@@ -14,6 +16,7 @@ verbose = True
 # Set up some example lists
 admin_file='./admins.txt'
 catalog_file='./numbers.txt'
+catalog_path='lists/'
 
 
 def unhandled_exception_hook(errtype, value, tb):
@@ -42,7 +45,6 @@ def unhandled_exception_hook(errtype, value, tb):
 
 sys.excepthook = unhandled_exception_hook
 
-
 try:
    admincatalog=open(admin_file,'r')
    admins=admincatalog.read().split()
@@ -60,6 +62,7 @@ except UserWarning, (errno, strerror):
    print 'Warning: Not using any admins!'
    admins=[]
 
+"""
 try:
    usercatalog=open(catalog_file,'r')
    users=usercatalog.read().split()
@@ -81,20 +84,17 @@ except UserWarning, (errno, strerror):
 if users==[] and admins==[]:
    print 'Error: You dont have neither Admins nor Users so this setup is useless! Create at least one admin account.'
    sys.exit(1)
+"""
 
-#This stuff is an example and not proper service operation code. TODO handle lists so that they can be rw'es from more then one sources...
-ll1 = List('A. ')
-ll2 = List('B. ', List.TYPE_CLOSED)
-for num in users:
-    ll1.addNumber(num)
-    ll2.addNumber(num)
+# TODO handle lists so that they can be rw'es from more then one sources...
 
-ll2.addAdmin('+447785016005')
-ll2.timestamp = True
+lists = []
+# add all catalog files in the specified path
+for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
+    ll = List()
+    ll.from_file(infile)
+    lists.append(ll)
 
-lists = [ll1,ll2]
-
-#admins = ['+447785016005']
 def isAdmin(num):
     for n in admins:
         if n == num:
