@@ -91,6 +91,7 @@ if users==[] and admins==[]:
 lists = []
 # add all catalog files in the specified path
 for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
+    print "Reading %s"%infile
     ll = List()
     ll.from_file(infile)
     lists.append(ll)

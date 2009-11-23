@@ -109,13 +109,36 @@ class List:
                 self.admins.append(normalizeNumber(line))
             self.list.append(normalizeNumber(line))
 
+    def to_file(self, filename):
+        str = ""
+        str += "# prefix = '%s'\n"%self.prefix
+        str += "# type = %s\n"%('open' if self.type == self.TYPE_OPEN else 'closed')
+        str += "# timestamp = %s\n"%('yes' if self.timestamp else 'no')
+
+        for num in self.admins:
+            str += "!" + num + "\n"
+
+        for num in self.list:
+            if num not in self.admins:
+                str += num + "\n"
+
+        outfile = open(filename, 'w')
+        outfile.write(str)
+        outfile.close()
 
     def addNumber(self, num):
         num = normalizeNumber(num)
         if not num:
             print "Couldn't add number"
             return False
-        self.list.append(num)
+
+        if not num in self.list:
+            self.list.append(num)
+            if self.filename:
+                outfile = open(self.filename, "a")
+                outfile.write(num+'\n')
+                outfile.close()
+
         return True
 
     def addAdmin(self, num):
@@ -123,7 +146,12 @@ class List:
         if not num:
             print "Couldn't add number"
             return False
-        self.admins.append(num)
+        if not num in self.list:
+            self.list.append(num)
+        if not num in self.admins:
+            self.admins.append(num)
+        if self.filename:
+            self.to_file(self.filename)
         return True
 
     def authorizedToSend(self, num):
