@@ -10,14 +10,19 @@ import os
 import glob
 TESTING = True
 
-# Whether be a bit more verbose
 verbose = True
 
 # Set up some example lists
-admin_file='./admins.txt'
-catalog_file='./numbers.txt'
 catalog_path='lists/'
+lists = []
 
+def init_lists():
+    # add all catalog files in the specified path
+    for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
+        print "Reading %s"%infile
+        ll = List()
+        ll.from_file(infile)
+        lists.append(ll)
 
 def unhandled_exception_hook(errtype, value, tb):
    #handle gammu errors separately
@@ -45,63 +50,7 @@ def unhandled_exception_hook(errtype, value, tb):
 
 sys.excepthook = unhandled_exception_hook
 
-try:
-   admincatalog=open(admin_file,'r')
-   admins=admincatalog.read().split()
-   
-   if len(admins)<1:
-      raise UserWarning (1, 'Nothing in there!')
-
-except IOError, (errno, strerror):
-   print 'Warning: Could not find configuraiton file for admins in %s , %s' % (admin_file, strerror)
-   print 'Warning: Not using any admins!'
-   admins=[]
-
-except UserWarning, (errno, strerror):
-   print 'Warning: Problem with admin configuration! in %s , %s' % (admin_file, strerror)
-   print 'Warning: Not using any admins!'
-   admins=[]
-
-"""
-try:
-   usercatalog=open(catalog_file,'r')
-   users=usercatalog.read().split()
-   usercatalog.close()
-
-   if len(users)<1:
-      raise UserWarning (1, 'Nothing in there!')
-	 
-except IOError, (errno, strerror):
-   print 'Warning: Could not read recipients catalog file %s, %s' % (catalog_file, strerror)
-   print 'Warning: Not using any recipients!'
-   users=[]
-
-except UserWarning, (errno, strerror):
-   print 'Warning: Problem with recipients catalog in %s , %s' % (catalog_file, strerror)
-   print 'Warning: Not using any recipients!'
-   users=[]
-
-if users==[] and admins==[]:
-   print 'Error: You dont have neither Admins nor Users so this setup is useless! Create at least one admin account.'
-   sys.exit(1)
-"""
-
 # TODO handle lists so that they can be rw'es from more then one sources...
-
-lists = []
-# add all catalog files in the specified path
-for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
-    print "Reading %s"%infile
-    ll = List()
-    ll.from_file(infile)
-    lists.append(ll)
-
-def isAdmin(num):
-    for n in admins:
-        if n == num:
-            return True
-        print num, ' != ', n
-    return False
 
 def Callback(sm, type, data):
     if verbose:
@@ -121,7 +70,7 @@ def Callback(sm, type, data):
             fromNum = data['Number']
 
             # Check authorization
-            if isAdmin(fromNum) or currentlist.authorizedToSend(fromNum):
+            if currentlist.authorizedToSend(fromNum):
                 # Everything is in order, start sending smses
 
                 # Remove prefix and add optional timestamp
@@ -138,29 +87,35 @@ def Callback(sm, type, data):
             else:
                 print 'Number not authorized to send', fromNum
 
-sm = None
-if TESTING:
-    sm = bogus.StateMachine()
-else:
-    sm = gammu.StateMachine()
+def main():
+    init_lists()
 
-sm.ReadConfig()
-sm.Init()
-sm.SetIncomingCallback(Callback)
-try:
-    sm.SetIncomingSMS()
-except gammu.ERR_NOTSUPPORTED:
-    print 'Your phone does not support incoming SMS notifications!'
+    sm = None
+    if TESTING:
+        sm = bogus.StateMachine()
+    else:
+        sm = gammu.StateMachine()
 
-if TESTING:
-    while 1:
-        print 'Write a message:'
-        x = raw_input()
-        sm.gotsms(x)
-else:
-    # We need to keep communication with phone to get notifications
-    print 'Press Ctrl+C to interrupt'
-    while 1:
-        time.sleep(1)
-        status = sm.GetBatteryCharge()
-        print 'Battery is at %d%%' % status['BatteryPercent']
+    sm.ReadConfig()
+    sm.Init()
+    sm.SetIncomingCallback(Callback)
+    try:
+        sm.SetIncomingSMS()
+    except gammu.ERR_NOTSUPPORTED:
+        print 'Your phone does not support incoming SMS notifications!'
+
+    if TESTING:
+        while 1:
+            print 'Write a message:'
+            x = raw_input()
+            sm.gotsms(x)
+    else:
+        # We need to keep communication with phone to get notifications
+        print 'Press Ctrl+C to interrupt'
+        while 1:
+            time.sleep(1)
+            status = sm.GetBatteryCharge()
+            print 'Battery is at %d%%' % status['BatteryPercent']
+
+if __name__ == '__main__' :
+    main()
