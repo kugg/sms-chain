@@ -9,6 +9,7 @@ import traceback
 import os
 import glob
 TESTING = True
+DELETE_READ_SMS = False
 
 verbose = True
 
@@ -63,6 +64,9 @@ def Callback(sm, type, data):
     if verbose:
         print data
 
+    if DELETE_READ_SMS:
+        sm.DeleteSMS(data['Folder'], data['Location'])
+
     tstamp = time.strftime("%H:%M", time.localtime())
 
     for currentlist in lists:
@@ -80,7 +84,8 @@ def Callback(sm, type, data):
 
                 # send away!
                 for num in currentlist.list:
-                    message = {'Text': response, 'SMSC': {'Location': 1}, 'Number': num}
+                    message = {'Text': response, 'SMSC': {'Location': 1},\
+                               'Number': num}
                     if verbose:
                         print "sending", message
                     sm.SendSMS(message)
@@ -116,6 +121,11 @@ def main():
             time.sleep(1)
             status = sm.GetBatteryCharge()
             print 'Battery is at %d%%' % status['BatteryPercent']
+            sms_status = sm.GetSMSStatus()
+            print 'SIM memory: %d %d %d'%(sms_status['SIMUnRead'],\
+                      sms_status['SIMUsed'],sms_status['SIMSize'])
+            print 'Phone memory: %d %d %d'%(sms_status['PhoneUnRead'],\
+                    sms_status['PhoneUsed'],sms_status['PhoneSize'])
 
 if __name__ == '__main__' :
     main()
