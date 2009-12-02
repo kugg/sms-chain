@@ -19,8 +19,16 @@ verbose = True
 catalog_path='lists/'
 lists = []
 
+def init_lists():
+    """Add all catalog files in the specified path.""" 
+    for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
+        print "Reading %s"%infile
+        ll = List()
+        ll.from_file(infile)
+        lists.append(ll)
+
 def unhandled_exception_hook(errtype, value, tb):
-   #handle gammu errors separately
+   """Handle gammu errors separately."""
    gammu_names=dir(gammu)
    for gammu_name in gammu_names:
       if 'ERR'==gammu_name[:3]:

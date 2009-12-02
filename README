@@ -1,1 +1,21 @@
-This project's intention is to set up a workable sms chain using gammu
+# SMS Chain #
+
+This project's intention is to set up a workable SMS chain using gammu.
+
+## Dependencies ##
+
+[Gammu](http://gammu.org)
+
+The SMS backend was based on gammu, downloaded from [http://cihar.com/gammu/](http://cihar.com/gammu/).
+
+Most of the code source is covered by GNU GPL license. The following copyright notices apply to GNU GPL-licensed parts:
+
+SMS daemon code:
+
+Copyright (C) 2002-2004 by Marcin Wiacek and Joergen Thomsen
+Copyright (C) 2009 by Michal Čihař
+
+## Authors ##
+
+kufstil, kugg, phrst, olleolleolle
+

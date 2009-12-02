@@ -14,6 +14,9 @@ class ParseCatalogFileError(Error):
         return repr(self.value)
 
 def normalizeNumber(num):
+    """Takes a phone number string and massages it, removing bad
+    characters, and parsing from which country the number came from,
+    and which operator carries the number."""
     # basic error checking
 
     # remove odd characters
@@ -23,27 +26,37 @@ def normalizeNumber(num):
     # convert numbers to normal form (+467...)
     #if num[:2] == '07':
     #    num = '+46' + num[1:]
-    countrycodes={'Sweden':'+46','Denmark':'+45','Uk':'+44'}
-    operatorprefix={'tdc':'','sonofon':'','orange':'','telia':'','tre':''}
+    countrycodes = {
+        'Sweden': '+46',
+        'Denmark': '+45',
+        'Uk': '+44',
+    }
+    operatorprefix = {
+        'tdc': '',
+        'sonofon': '',
+        'orange': '',
+        'telia': '',
+        'tre': '',
+    }
     #TODO add countrycodes and operator codes!
     for country, code in countrycodes.items():
         if num[:3]==code:
              #TODO Add country based separation here!
-
              # do some error checking
              if country == 'Sweden' and len(num) != 12:
                  raise NumberError('Wrong number of digits in number: %s'%num)
-
              return num
              #TODO Add operator based separation here!
- 
     return num
 
 class List:
-    # On an open list everyone on the list can send to it
-    # On a closed list only the admins can send to it
+    """An SMS recipient list.
+    Everyone can send to an open list.
+    Only the admins can send to a closed list.
+    """
     TYPE_OPEN, TYPE_CLOSED = range(2)
     def __init__(self, filename=None):
+        """Initialize List, optionally from given filename."""
         self.prefix = None
         self.type = self.TYPE_CLOSED
         self.timestamp = False
@@ -54,6 +67,7 @@ class List:
             self.from_file(self.filename)
 
     def from_file(self, filename):
+        """Load up List from given filename."""
         self.filename = filename
         infile = open(filename, "r")
         prefix = filename
@@ -110,23 +124,22 @@ class List:
             self.list.append(normalizeNumber(line))
 
     def to_file(self, filename):
-        str = ""
-        str += "# prefix = '%s'\n"%self.prefix
-        str += "# type = %s\n"%('open' if self.type == self.TYPE_OPEN else 'closed')
-        str += "# timestamp = %s\n"%('yes' if self.timestamp else 'no')
-
+        """Persists List to given filename."""
+        s = ""
+        s += "# prefix = '%s'\n"%self.prefix
+        s += "# type = %s\n"%('open' if self.type == self.TYPE_OPEN else 'closed')
+        s += "# timestamp = %s\n"%('yes' if self.timestamp else 'no')
         for num in self.admins:
-            str += "!" + num + "\n"
-
+            s += "!" + num + "\n"
         for num in self.list:
             if num not in self.admins:
-                str += num + "\n"
-
+                s += num + "\n"
         outfile = open(filename, 'w')
-        outfile.write(str)
+        outfile.write(s)
         outfile.close()
 
     def addNumber(self, num):
+        """Add given phone number to recipient List."""
         num = normalizeNumber(num)
         if not num:
             print "Couldn't add number"
@@ -142,6 +155,7 @@ class List:
         return True
 
     def addAdmin(self, num):
+        """Add given phone number as administrator of recipient List."""
         num = normalizeNumber(num)
         if not num:
             print "Couldn't add number"
@@ -155,6 +169,7 @@ class List:
         return True
 
     def authorizedToSend(self, num):
+        """Returns true if given phone number has send privileges on this List."""
         num = normalizeNumber(num)
         if not num:
             print 'Wrong format'
@@ -176,15 +191,17 @@ class List:
         return False
 
     def __str__(self):
-        str = "Prefix = %s\n"%self.prefix
+        """String representation of of List."""
+        s = "Prefix = %s\n"%self.prefix
         if self.type == self.TYPE_OPEN:
-            str += "Open list\n"
-        else: str += "Closed list\n"
-        str += "Timestamp: %s\n"%self.timestamp
-        str += "Admins:\n"
+            s += "Open list\n"
+        else:
+            s += "Closed list\n"
+        s += "Timestamp: %s\n"%self.timestamp
+        s += "Admins:\n"
         for a in self.admins:
-            str += a + "\n"
-        str += "Users:\n"
+            s += a + "\n"
+        s += "Users:\n"
         for u in self.list:
-            str += u + "\n"
-        return str
+            s += u + "\n"
+        return s
