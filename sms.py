@@ -29,7 +29,7 @@ def unhandled_exception_hook(errtype, value, tb):
              #print value
              #main()
              print  'Gammu %s: %s' % (value[0]['Where'],value[0]['Text'])
-	     try:
+             try:
                  main()
              except:
                  pass
