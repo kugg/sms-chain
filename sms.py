@@ -8,22 +8,16 @@ import sys
 import traceback
 import os
 import glob
+
+# 
 TESTING = False
 DELETE_READ_SMS = False
-
+CLEAR_SMS_AT_START = False
 verbose = True
 
 # Set up some example lists
 catalog_path='lists/'
 lists = []
-
-def init_lists():
-    # add all catalog files in the specified path
-    for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
-        print "Reading %s"%infile
-        ll = List()
-        ll.from_file(infile)
-        lists.append(ll)
 
 def unhandled_exception_hook(errtype, value, tb):
    #handle gammu errors separately
@@ -50,6 +44,14 @@ def unhandled_exception_hook(errtype, value, tb):
       sys.exit(1)
 
 sys.excepthook = unhandled_exception_hook
+
+def init_lists():
+    # add all catalog files in the specified path
+    for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
+        print "Reading %s"%infile
+        ll = List()
+        ll.from_file(infile)
+        lists.append(ll)
 
 def delete_all_sms(sm):
     status = sm.GetSMSStatus()
@@ -188,8 +190,10 @@ def main():
     except gammu.ERR_NOTSUPPORTED:
         print 'Your phone does not support incoming SMS notifications!'
 
-    print "Clearing old sms"
-    delete_all_sms(sm)
+    if CLEAR_SMS_AT_START:
+        print "Clearing old sms"
+        delete_all_sms(sm)
+
     if TESTING:
         while 1:
             print 'Write a message:'
