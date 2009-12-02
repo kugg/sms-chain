@@ -26,9 +26,14 @@ def unhandled_exception_hook(errtype, value, tb):
       if 'ERR'==gammu_name[:3]:
          #print errtype.__name__, gammu_name
          if gammu_name==errtype.__name__:
-             print value
-  	     return 0
- 
+             #print value
+             #main()
+             print  'Gammu %s: %s' % (value[0]['Where'],value[0]['Text'])
+	     try:
+                 main()
+             except:
+                 pass
+
    if errtype==KeyboardInterrupt:
       print 'Goodbye!'
       sys.exit(0)
@@ -181,7 +186,8 @@ def main():
         sm = bogus.StateMachine()
     else:
         sm = gammu.StateMachine()
-
+    sm.SetDebugFile('/tmp/gammu.log')
+    sm.SetDebugLevel('errorsdate')
     sm.ReadConfig()
     sm.Init()
     sm.SetIncomingCallback(Callback)
