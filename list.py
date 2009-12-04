@@ -168,6 +168,15 @@ class List:
             self.to_file(self.filename)
         return True
 
+    def removeNumber(self, num):
+        """Remove number from list"""
+        num = normalizeNumber(num)
+        if num in self.admins:
+            self.admins.remove(num)
+        if num in self.list:
+            self.list.remove(num)
+
+
     def authorizedToSend(self, num):
         """Returns true if given phone number has send privileges on this List."""
         num = normalizeNumber(num)
@@ -186,6 +195,9 @@ class List:
             return False
 
         return False
+
+    def isAdmin(self, num):
+        return num in self.admins
 
     def fromFile(self, filename):
         return False

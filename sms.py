@@ -13,6 +13,8 @@ import glob
 TESTING = False
 DELETE_READ_SMS = False
 CLEAR_SMS_AT_START = False
+COMMAND_PREFIX = ".."
+ALLOW_MULTIPART = False
 verbose = True
 
 # Set up some example lists
@@ -84,30 +86,55 @@ def delete_all_sms(sm):
                 print '\n%s' % m['Text']
             sm.DeleteSMS(Location = m['Location'], Folder = 0)
 
+commands = [("au",lambda text, d, sm, li: li.addNumber(text)),
+            ("aa",lambda text, d, sm, li: li.addAdmin(text)),
+            ( "d",lambda text, d, sm, li: li.removeNumber(text))]
+
+def sendSMS(sm, text, num):
+    message = {'Text': text, 'SMSC': {'Location': 1},\
+               'Number': num}
+    if verbose:
+        print "sending", message
+    sm.SendSMS(message)
+
 def handle_message(text, data, sm):
     fromNum = data['Number']
     tstamp = time.strftime("%H:%M", time.localtime())
+    text = text.strip()
 
     for currentlist in lists:
-        if currentlist.prefix == text[:len(currentlist.prefix)]:
+        if text.startswith(currentlist.prefix):
+            text = text[len(currentlist.prefix):].strip()
+
+            # check if we have a command
+            print "checking for command"
+            if text.startswith(COMMAND_PREFIX) and currentlist.isAdmin(fromNum):
+                text = text[len(COMMAND_PREFIX):].strip()
+                print "command:", text
+                for command,handler in commands:
+                    if text.lower().startswith(command):
+                        print "found command"
+                        text = text[len(command):].strip()
+                        handler(text,data,sm,currentlist)
+                        return
+
             # Check authorization
+            print "trying to repeat"
             if currentlist.authorizedToSend(fromNum):
                 # Everything is in order, start sending smses
 
-                # Remove prefix and add optional timestamp
-                response = text[len(currentlist.prefix):]
+                # add optional timestamp
+                response = text
                 if currentlist.timestamp:
                     response = tstamp + ' ' + response
 
                 # send away!
                 for num in currentlist.list:
-                    message = {'Text': response, 'SMSC': {'Location': 1},\
-                               'Number': num}
-                    if verbose:
-                        print "sending", message
-                    sm.SendSMS(message)
+                    sendSMS(sm, response, num)
             else:
                 print 'Number not authorized to send', fromNum
+
+            return
 
 class MultipartSMS:
     def __init__(self, from_num, id8bit, id16bit, size):
@@ -158,27 +185,30 @@ def Callback(sm, type, data):
     # Handle multipart messages
     text = ""
     if data['UDH']['Type'] == 'ConcatenatedMessages':
-        num = data['Number']
-        id8bit = data['UDH']['ID8bit']
-        id16bit = data['UDH']['ID16bit']
-        size = data['UDH']['AllParts']
+        if ALLOW_MULTIPART:
+            num = data['Number']
+            id8bit = data['UDH']['ID8bit']
+            id16bit = data['UDH']['ID16bit']
+            size = data['UDH']['AllParts']
 
-        new_message = True
-        for m in multipart_messages:
-            if m.same(num,id8bit,id16bit,size):
-                new_message = False
+            new_message = True
+            for m in multipart_messages:
+                if m.same(num,id8bit,id16bit,size):
+                    new_message = False
+                    m.add_part(data)
+                    if m.complete():
+                        text = m.get_text()
+                        multipart_messages.remove(m)
+                    else:
+                        return # wait for complete Message
+                    break
+            if new_message:
+                m = MultipartSMS(num, id8bit, id16bit, size)
                 m.add_part(data)
-                if m.complete():
-                    text = m.get_text()
-                    multipart_messages.remove(m)
-                else:
-                    return # wait for complete Message
-                break
-        if new_message:
-            m = MultipartSMS(num, id8bit, id16bit, size)
-            m.add_part(data)
-            multipart_messages.append(m)
-            return  # wait for complete message
+                multipart_messages.append(m)
+                return  # wait for complete message
+        else:
+            sendSMS(sm, "Too long message", data['Number'])
     else:
         text = data['Text']
 
