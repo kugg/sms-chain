@@ -8,6 +8,7 @@ import sys
 import traceback
 import os
 import glob
+import Queue
 
 # 
 TESTING = False
@@ -90,12 +91,30 @@ commands = [("au",lambda text, d, sm, li: li.addNumber(text)),
             ("aa",lambda text, d, sm, li: li.addAdmin(text)),
             ( "d",lambda text, d, sm, li: li.removeNumber(text))]
 
+class SMSQueue:
+    def __init__(self):
+        self.q = Queue.Queue()
+
+    def queueSMS(self, sm, text, num):
+        self.q.put((sm,text,num))
+
+    def sendSMSes(self):
+        while not sms_queue.empty():
+            sm,text,num = self.q.get()
+            sendSMS(sm, text, num)
+
+    def empty(self):
+        return self.q.empty()
+    
 def sendSMS(sm, text, num):
     message = {'Text': text, 'SMSC': {'Location': 1},\
                'Number': num}
     if verbose:
         print "sending", message
+        sys.stdout.flush()
     sm.SendSMS(message)
+
+sms_queue = SMSQueue()
 
 def handle_message(text, data, sm):
     fromNum = data['Number']
@@ -130,7 +149,7 @@ def handle_message(text, data, sm):
 
                 # send away!
                 for num in currentlist.list:
-                    sendSMS(sm, response, num)
+                    sms_queue.queueSMS(sm, response, num)
             else:
                 print 'Number not authorized to send', fromNum
 
@@ -166,6 +185,7 @@ multipart_messages = []
 def Callback(sm, type, data):
     if verbose:
         print 'Received incoming event type %s, data:' % type
+        sys.stdout.flush()
     if type != 'SMS':
         print 'Unsupported event!'
         return 
@@ -214,6 +234,7 @@ def Callback(sm, type, data):
 
     if verbose:
         print "Got sms:\n",text
+        sys.stdout.flush()
     handle_message(text, data, sm)
 
 def main():
@@ -253,6 +274,8 @@ def main():
             sms_status = sm.GetSMSStatus()
             print 'SIM memory free: %d'%(sms_status['SIMSize']-sms_status['SIMUsed'])
             print 'Phone memory free: %d'%(sms_status['PhoneSize']-sms_status['PhoneUsed'])
+            if not sms_queue.empty():
+                sms_queue.sendSMSes()
 
 if __name__ == '__main__' :
     main()
