@@ -152,7 +152,10 @@ def handle_message(text, data, sm):
                     sms_queue.queueSMS(sm, response, num)
             else:
                 print 'Number not authorized to send', fromNum
-
+                if currentlist.reportUnauthorizedSMSes:
+                    t = "Not sent/" + fromNum + ":" + text
+                    for num in currentlist.admins:
+                        sms_queue.queueSMS(sm, t, num)
             return
 
 class MultipartSMS:
@@ -240,6 +243,7 @@ def Callback(sm, type, data):
 def main():
     init_lists()
 
+    print "starting statemachine"
     sm = None
     if TESTING:
         sm = bogus.StateMachine()

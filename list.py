@@ -24,8 +24,8 @@ def normalizeNumber(num):
     num = num.replace(' ','')
 
     # convert numbers to normal form (+467...)
-    #if num[:2] == '07':
-    #    num = '+46' + num[1:]
+    if num[:2] == '07':
+        num = '+46' + num[1:]
     countrycodes = {
         'Sweden': '+46',
         'Denmark': '+45',
@@ -60,6 +60,7 @@ class List:
         self.prefix = None
         self.type = self.TYPE_CLOSED
         self.timestamp = False
+        self.reportUnauthorizedSMSes = True
         self.list = []
         self.admins = []
         self.filename = filename
@@ -70,14 +71,13 @@ class List:
         """Load up List from given filename."""
         self.filename = filename
         infile = open(filename, "r")
-        prefix = filename
+        prefix = ''
         type = None
         timestamp = None
 
         # parse the header
         while infile.read(1) == '#':
             line = infile.readline()
-            line = line[1:]
             if line.find('=') != -1:
                 field,value = line.split('=',1)
                 field = field.strip()
@@ -141,6 +141,7 @@ class List:
     def addNumber(self, num):
         """Add given phone number to recipient List."""
         num = normalizeNumber(num)
+        print "adding user", num
         if not num:
             print "Couldn't add number"
             return False
@@ -157,6 +158,7 @@ class List:
     def addAdmin(self, num):
         """Add given phone number as administrator of recipient List."""
         num = normalizeNumber(num)
+        print "adding admin", num
         if not num:
             print "Couldn't add number"
             return False
@@ -171,10 +173,13 @@ class List:
     def removeNumber(self, num):
         """Remove number from list"""
         num = normalizeNumber(num)
+        print "removing", num
         if num in self.admins:
             self.admins.remove(num)
         if num in self.list:
             self.list.remove(num)
+        self.to_file(self.filename)
+
 
 
     def authorizedToSend(self, num):
