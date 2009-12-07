@@ -135,8 +135,8 @@ class MultipartSMS:
 #
 # Program functionality
 #
-commands = [("au",lambda text, d, sm, li: li.addNumber(text)),
-            ("aa",lambda text, d, sm, li: li.addAdmin(text)),
+commands = [("a!",lambda text, d, sm, li: li.addAdmin(text)),
+            ( "a",lambda text, d, sm, li: li.addNumber(text)),
             ( "d",lambda text, d, sm, li: li.removeNumber(text))]
     
 sms_queue = SMSQueue()
