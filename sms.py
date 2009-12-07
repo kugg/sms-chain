@@ -10,12 +10,11 @@ import os
 import glob
 import Queue
 
-# 
 TESTING = False
-DELETE_READ_SMS = False
-CLEAR_SMS_AT_START = False
-COMMAND_PREFIX = ".."
-ALLOW_MULTIPART = False
+DELETE_READ_SMS = False     # Delete smses after they have been recieved
+CLEAR_SMS_AT_START = False  # Clear phone and sim of smses during initialization
+COMMAND_PREFIX = ".."       # The prefix that marks a command
+ALLOW_MULTIPART = False     # Allow multipart smses
 verbose = True
 
 # Set up some example lists
@@ -61,15 +60,11 @@ def unhandled_exception_hook(errtype, value, tb):
 
 sys.excepthook = unhandled_exception_hook
 
-def init_lists():
-    # add all catalog files in the specified path
-    for infile in glob.glob(os.path.join(catalog_path, '*.cat') ):
-        print "Reading %s"%infile
-        ll = List()
-        ll.from_file(infile)
-        lists.append(ll)
-
+# 
+# Basic SMS stuff
+#
 def delete_all_sms(sm):
+    """ Delete all messages on phone and on sim"""
     status = sm.GetSMSStatus()
     remain = status['SIMUsed'] + status['PhoneUsed'] + status['TemplatesUsed']
     start = True
@@ -87,9 +82,14 @@ def delete_all_sms(sm):
                 print '\n%s' % m['Text']
             sm.DeleteSMS(Location = m['Location'], Folder = 0)
 
-commands = [("au",lambda text, d, sm, li: li.addNumber(text)),
-            ("aa",lambda text, d, sm, li: li.addAdmin(text)),
-            ( "d",lambda text, d, sm, li: li.removeNumber(text))]
+def sendSMS(sm, text, num):
+    """ Send a message"""
+    message = {'Text': text, 'SMSC': {'Location': 1},\
+               'Number': num}
+    if verbose:
+        print "sending", message
+        sys.stdout.flush()
+    sm.SendSMS(message)
 
 class SMSQueue:
     def __init__(self):
@@ -105,18 +105,44 @@ class SMSQueue:
 
     def empty(self):
         return self.q.empty()
-    
-def sendSMS(sm, text, num):
-    message = {'Text': text, 'SMSC': {'Location': 1},\
-               'Number': num}
-    if verbose:
-        print "sending", message
-        sys.stdout.flush()
-    sm.SendSMS(message)
 
+class MultipartSMS:
+    def __init__(self, from_num, id8bit, id16bit, size):
+        self.from_num = from_num
+        self.id8bit = id8bit
+        self.id16bit = id16bit
+        self.size = size
+        self.parts = []
+
+    def same(self, from_num, id8bit, id16bit, size):
+        return from_num == self.from_num and id8bit == self.id8bit\
+                and id16bit == self.id16bit and self.size == size
+
+    def add_part(self, data):
+        self.parts.append(data)
+
+    def complete(self):
+        return len(self.parts) == self.size
+
+    def get_text(self):
+        text = ""
+        for i in range(1,self.size+1):
+            for p in self.parts:
+                if p['UDH']['PartNumber'] == i:
+                    text += p['Text']
+        return text
+
+#
+# Program functionality
+#
+commands = [("au",lambda text, d, sm, li: li.addNumber(text)),
+            ("aa",lambda text, d, sm, li: li.addAdmin(text)),
+            ( "d",lambda text, d, sm, li: li.removeNumber(text))]
+    
 sms_queue = SMSQueue()
 
 def handle_message(text, data, sm):
+    """Here we look at the message recieved and decide what to do with it"""
     fromNum = data['Number']
     tstamp = time.strftime("%H:%M", time.localtime())
     text = text.strip()
@@ -157,32 +183,6 @@ def handle_message(text, data, sm):
                     for num in currentlist.admins:
                         sms_queue.queueSMS(sm, t, num)
             return
-
-class MultipartSMS:
-    def __init__(self, from_num, id8bit, id16bit, size):
-        self.from_num = from_num
-        self.id8bit = id8bit
-        self.id16bit = id16bit
-        self.size = size
-        self.parts = []
-
-    def same(self, from_num, id8bit, id16bit, size):
-        return from_num == self.from_num and id8bit == self.id8bit\
-                and id16bit == self.id16bit and self.size == size
-
-    def add_part(self, data):
-        self.parts.append(data)
-
-    def complete(self):
-        return len(self.parts) == self.size
-
-    def get_text(self):
-        text = ""
-        for i in range(1,self.size+1):
-            for p in self.parts:
-                if p['UDH']['PartNumber'] == i:
-                    text += p['Text']
-        return text
 
 multipart_messages = []
 def Callback(sm, type, data):
